@@ -42,12 +42,23 @@ app.post("/api/users", async (req, res) => {
     const userObject = await database
       .collection("users")
       .findOne({ username: req.body.username });
-    console.log(userObject);
-    console.log(typeof userObject);
+    //console.log(userObject);
+    //console.log(typeof userObject);
     res.json({ username: req.body.username, _id: userObject._id });
   } catch (err) {
     console.log(err);
     res.status(500).send("Error inserting user.");
+  }
+});
+
+app.get("/api/users", async (req, res) => {
+  try {
+    const database = db.getDb();
+    const users = await database.collection("users").find().toArray();
+    res.json(users);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error fetching users.");
   }
 });
 
