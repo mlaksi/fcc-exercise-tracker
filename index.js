@@ -70,7 +70,12 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     const database = db.getDb();
 
     //pick up user data from form and route params
-    const formattedDate = new Date(req.body.date).toDateString();
+    let formattedDate = new Date(req.body.date).toDateString();
+    if (!req.body.date) {
+      const timestamp = Date.now();
+      formattedDate = new Date(timestamp).toDateString();
+    }
+
     const duration = parseInt(req.body.duration);
     const description = req.body.description;
     const id = new ObjectId(req.params._id);
