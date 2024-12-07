@@ -93,18 +93,27 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
       description: description,
     });
 
-    await database
-      .collection("users")
-      .updateOne(
-        { _id: user._id },
-        { $push: { exercises: { date: formattedDate, duration, description } } }
-      );
+    // await database
+    //   .collection("users")
+    //   .updateOne(
+    //     { _id: user._id },
+    //     { $push: { exercises: { date: formattedDate, duration, description } } }
+    //   );
 
-    const updatedUser = await database
-      .collection("users")
-      .findOne({ _id: user._id });
+    // const updatedUser = await database
+    //   .collection("users")
+    //   .findOne({ _id: user._id });
+    const exercise = await database
+      .collection("exercises")
+      .findOne({ userid: user._id });
 
-    res.json(updatedUser);
+    res.json({
+      username: exercise.username,
+      description: exercise.description,
+      duration: parseInt(exercise.duration),
+      date: exercise.date,
+      _id: exercise.userid,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).send("Error inserting exercise.");
