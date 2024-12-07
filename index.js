@@ -63,8 +63,6 @@ app.get("/api/users", async (req, res) => {
   }
 });
 
-// 7. You can POST to /api/users/:_id/exercises with form data description, duration, and optionally date. If no date is supplied, the current date will be used.
-// 8. The response returned from POST /api/users/:_id/exercises will be the user object with the exercise fields added.
 app.post("/api/users/:_id/exercises", async (req, res) => {
   try {
     const database = db.getDb();
