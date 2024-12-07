@@ -83,28 +83,28 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
       res.status(404).send("User not found");
     }
 
-    res.json({
-      _id: user._id,
+    const stringId = user._id.toString();
+
+    await database.collection("exercises").insertOne({
+      userid: user._id,
       username: user.username,
       date: formattedDate,
       duration: duration,
       description: description,
     });
 
-    // await database.collection("exercises").insertOne({
-    //   _id: user._id,
-    //   username: user.username,
-    //   date: formattedDate,
-    //   duration: duration,
-    //   description: description,
-    // });
-    // const exercise = database
-    //   .collection("exercises")
-    //   .findOne({ _id: user._id });
-    // if (exercise) {
-    //   res.json({ exercise });
-    // }
-    //await database.collection("exercises").insertOne({});
+    await database
+      .collection("users")
+      .updateOne(
+        { _id: user._id },
+        { $push: { exercises: { date: formattedDate, duration, description } } }
+      );
+
+    const updatedUser = await database
+      .collection("users")
+      .findOne({ _id: user._id });
+
+    res.json(updatedUser);
   } catch (err) {
     console.log(err);
     res.status(500).send("Error inserting exercise.");
