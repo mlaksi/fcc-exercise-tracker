@@ -71,7 +71,7 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
 
     //pick up user data from form and route params
     const formattedDate = new Date(req.body.date).toDateString();
-    const duration = req.body.duration;
+    const duration = parseInt(req.body.duration);
     const description = req.body.description;
     const id = new ObjectId(req.params._id);
 
@@ -93,16 +93,6 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
       description: description,
     });
 
-    // await database
-    //   .collection("users")
-    //   .updateOne(
-    //     { _id: user._id },
-    //     { $push: { exercises: { date: formattedDate, duration, description } } }
-    //   );
-
-    // const updatedUser = await database
-    //   .collection("users")
-    //   .findOne({ _id: user._id });
     const exercise = await database
       .collection("exercises")
       .findOne({ userid: user._id });
@@ -110,13 +100,51 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
     res.json({
       username: exercise.username,
       description: exercise.description,
-      duration: parseInt(exercise.duration),
+      duration: exercise.duration,
       date: exercise.date,
       _id: exercise.userid,
     });
   } catch (err) {
     console.log(err);
     res.status(500).send("Error inserting exercise.");
+  }
+});
+
+app.get("/api/users/:_id/logs", async (req, res) => {
+  try {
+    const database = db.getDb();
+    const stringId = req.params._id;
+    const objectId = new ObjectId(stringId);
+
+    const userExercises = await database
+      .collection("exercises")
+      .find({ userid: objectId })
+      .toArray();
+    //console.log(userExercises);
+    const user = await database.collection("users").findOne({ _id: objectId });
+    const username = user.username;
+
+    const formattedExercises = userExercises.map(
+      ({ description, duration, date }) => ({ description, duration, date })
+    );
+    //console.log(formattedExercises);
+
+    await database.collection("logs").insertOne({
+      username: username,
+      count: formattedExercises.length,
+      _id: objectId,
+      log: formattedExercises,
+    });
+
+    res.json({
+      username: username,
+      count: formattedExercises.length,
+      _id: objectId,
+      log: formattedExercises,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Error fetching logs.");
   }
 });
 
