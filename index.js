@@ -139,12 +139,24 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     );
     //console.log(formattedExercises);
 
-    await database.collection("logs").insertOne({
-      username: username,
-      count: formattedExercises.length,
-      _id: objectId,
-      log: formattedExercises,
-    });
+    const existingLog = await database
+      .collection("logs")
+      .findOne({ username: username });
+
+    if (existingLog) {
+      await database
+        .collection("logs")
+        .updateOne({ _id: objectId }, { $set: { log: formattedExercises } });
+      console.log("UPDATING LOG");
+    } else {
+      await database.collection("logs").insertOne({
+        username: username,
+        count: formattedExercises.length,
+        _id: objectId,
+        log: formattedExercises,
+      });
+      console.log("INSERTING LOG");
+    }
 
     if (noFrom && noTo && noLimit) {
       res.json({
