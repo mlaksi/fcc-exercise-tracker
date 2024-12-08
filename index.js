@@ -122,6 +122,9 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     const noTo = isNaN(new Date(to).getTime());
     const noLimit = !limit;
 
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+
     // console.log("no from", noFrom);
     // console.log("no to", noTo);
     // console.log("no limit", noLimit);
@@ -130,7 +133,6 @@ app.get("/api/users/:_id/logs", async (req, res) => {
       .collection("exercises")
       .find({ userid: objectId })
       .toArray();
-    //console.log(userExercises);
     const user = await database.collection("users").findOne({ _id: objectId });
     const username = user.username;
 
@@ -138,7 +140,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
       ({ description, duration, date }) => ({ description, duration, date })
     );
     //console.log(formattedExercises);
-
+    formattedExercises.reverse();
     const existingLog = await database
       .collection("logs")
       .findOne({ username: username });
@@ -147,7 +149,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
       await database
         .collection("logs")
         .updateOne({ _id: objectId }, { $set: { log: formattedExercises } });
-      console.log("UPDATING LOG");
+      //console.log("UPDATING LOG");
     } else {
       await database.collection("logs").insertOne({
         username: username,
@@ -155,7 +157,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
         _id: objectId,
         log: formattedExercises,
       });
-      console.log("INSERTING LOG");
+      //console.log("INSERTING LOG");
     }
 
     if (noFrom && noTo && noLimit) {
@@ -164,6 +166,74 @@ app.get("/api/users/:_id/logs", async (req, res) => {
         count: formattedExercises.length,
         _id: objectId,
         log: formattedExercises,
+      });
+    } else {
+      let scopedExercises = [];
+
+      formattedExercises.forEach((exercise) => {
+        const exerciseDateObject = new Date(exercise.date);
+        const fromDateObject = new Date(from);
+        const toDateObject = new Date(to);
+        exerciseDateObject.setHours(0, 0, 0, 0);
+        fromDateObject.setHours(0, 0, 0, 0);
+        toDateObject.setHours(0, 0, 0, 0);
+        const fromFlag = false;
+        const toFlag = false;
+
+        if (!noFrom && noTo) {
+          if (
+            exerciseDateObject.toISOString() >= fromDateObject.toISOString()
+          ) {
+            scopedExercises.push(exercise);
+          }
+        }
+
+        if (noFrom && !noTo) {
+          if (exerciseDateObject.toISOString() <= toDateObject.toISOString()) {
+            scopedExercises.push(exercise);
+          }
+        }
+
+        if (!noFrom && !noTo) {
+          if (
+            exerciseDateObject.toISOString() >= fromDateObject.toISOString() &&
+            exerciseDateObject.toISOString() <= toDateObject.toISOString()
+          ) {
+            scopedExercises.push(exercise);
+          }
+        }
+      });
+
+      //console.log(scopedExercises);
+
+      if (!noLimit) {
+        scopedExercises = scopedExercises.slice(0, parseInt(limit));
+        console.log(scopedExercises);
+      }
+
+      // if (noLimit) {
+      //   res.json({
+      //     username: username,
+      //     count: scopedExercises.length,
+      //     _id: objectId,
+      //     log: scopedExercises,
+      //   });
+      // } else {
+      //   const limitInt = parseInt(limit);
+      //   scopedExercises = scopedExercises.slice(0, limitInt);
+      //   res.json({
+      //     username: username,
+      //     count: scopedExercises.length,
+      //     _id: objectId,
+      //     log: scopedExercises,
+      //   });
+      // }
+
+      res.json({
+        username: username,
+        count: scopedExercises.length,
+        _id: objectId,
+        log: scopedExercises,
       });
     }
   } catch (err) {
