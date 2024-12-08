@@ -117,6 +117,10 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     const from = req.query.from;
     const to = req.query.to;
     const limit = req.query.limit;
+    console.log("FROM", from);
+    console.log("TO", to);
+    console.log("LIMIT", limit);
+    console.log("ID", stringId);
 
     const noFrom = isNaN(new Date(from).getTime());
     const noTo = isNaN(new Date(to).getTime());
@@ -210,24 +214,6 @@ app.get("/api/users/:_id/logs", async (req, res) => {
         scopedExercises = scopedExercises.slice(0, parseInt(limit));
         console.log(scopedExercises);
       }
-
-      // if (noLimit) {
-      //   res.json({
-      //     username: username,
-      //     count: scopedExercises.length,
-      //     _id: objectId,
-      //     log: scopedExercises,
-      //   });
-      // } else {
-      //   const limitInt = parseInt(limit);
-      //   scopedExercises = scopedExercises.slice(0, limitInt);
-      //   res.json({
-      //     username: username,
-      //     count: scopedExercises.length,
-      //     _id: objectId,
-      //     log: scopedExercises,
-      //   });
-      // }
 
       res.json({
         username: username,
