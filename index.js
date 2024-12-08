@@ -128,8 +128,17 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     const objectId = new ObjectId(stringId);
 
     //optional query params
-    const fromDate = req.query.from;
-    console.log(fromDate);
+    const from = req.query.from;
+    const to = req.query.to;
+    const limit = req.query.limit;
+
+    const noFrom = isNaN(new Date(from).getTime());
+    const noTo = isNaN(new Date(to).getTime());
+    const noLimit = !limit;
+
+    console.log("no from", noFrom);
+    console.log("no to", noTo);
+    console.log("no limit", noLimit);
 
     const userExercises = await database
       .collection("exercises")
@@ -151,12 +160,14 @@ app.get("/api/users/:_id/logs", async (req, res) => {
       log: formattedExercises,
     });
 
-    res.json({
-      username: username,
-      count: formattedExercises.length,
-      _id: objectId,
-      log: formattedExercises,
-    });
+    if (!from && !to && !limit) {
+      res.json({
+        username: username,
+        count: formattedExercises.length,
+        _id: objectId,
+        log: formattedExercises,
+      });
+    }
   } catch (err) {
     console.log(err);
     res.status(500).send("Error fetching logs.");
