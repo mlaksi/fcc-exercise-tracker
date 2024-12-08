@@ -96,17 +96,25 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
       description: description,
     });
 
-    const exercise = await database
-      .collection("exercises")
-      .findOne({ userid: user._id });
-
     res.json({
-      username: exercise.username,
-      description: exercise.description,
-      duration: exercise.duration,
-      date: exercise.date,
-      _id: exercise.userid,
+      username: user.username,
+      description: description,
+      duration: duration,
+      date: formattedDate,
+      _id: user._id,
     });
+
+    // const exercise = await database
+    //   .collection("exercises")
+    //   .findOne({ userid: user._id });
+
+    // res.json({
+    //   username: exercise.username,
+    //   description: exercise.description,
+    //   duration: exercise.duration,
+    //   date: exercise.date,
+    //   _id: exercise.userid,
+    // });
   } catch (err) {
     console.log(err);
     res.status(500).send("Error inserting exercise.");
@@ -118,6 +126,10 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     const database = db.getDb();
     const stringId = req.params._id;
     const objectId = new ObjectId(stringId);
+
+    //optional query params
+    const fromDate = req.query.from;
+    console.log(fromDate);
 
     const userExercises = await database
       .collection("exercises")
