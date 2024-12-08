@@ -14,25 +14,6 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
 });
 
-//TEST ROUTE
-//create a test BOOK collection inside a db, insert one document into it
-app.get("/mlaksi", async (req, res) => {
-  try {
-    const database = db.getDb();
-    await database.collection("books").insertOne({
-      title: "The Count of Monte Cristo",
-      author: "Alexandre Dumas",
-      year: 1844,
-      genres: ["Adventure", "Historical Fiction"],
-      available: true,
-    });
-    res.status(200).send("Book inserted successfully.");
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error inserting book.");
-  }
-});
-
 app.post("/api/users", async (req, res) => {
   //res.json({ test: req.body.username });
   try {
@@ -136,9 +117,9 @@ app.get("/api/users/:_id/logs", async (req, res) => {
     const noTo = isNaN(new Date(to).getTime());
     const noLimit = !limit;
 
-    console.log("no from", noFrom);
-    console.log("no to", noTo);
-    console.log("no limit", noLimit);
+    // console.log("no from", noFrom);
+    // console.log("no to", noTo);
+    // console.log("no limit", noLimit);
 
     const userExercises = await database
       .collection("exercises")
@@ -160,7 +141,7 @@ app.get("/api/users/:_id/logs", async (req, res) => {
       log: formattedExercises,
     });
 
-    if (!from && !to && !limit) {
+    if (noFrom && noTo && noLimit) {
       res.json({
         username: username,
         count: formattedExercises.length,
