@@ -172,6 +172,8 @@ app.get("/api/users/:_id/logs", async (req, res) => {
         log: formattedExercises,
       });
     } else {
+      //nikada se nece napuniti niz ako imamo samo setovan limit, a nemamo setovan from i to
+      //array will never fill up if there is only a limit set, and none of the from and to optional query parameters
       let scopedExercises = [];
 
       formattedExercises.forEach((exercise) => {
@@ -208,12 +210,23 @@ app.get("/api/users/:_id/logs", async (req, res) => {
         }
       });
 
-      //console.log(scopedExercises);
+      console.log(scopedExercises);
+      //edge case,if there is only a limit set
+      if (scopedExercises.length === 0) {
+        scopedExercises = formattedExercises;
+      }
 
       if (!noLimit) {
         scopedExercises = scopedExercises.slice(0, parseInt(limit));
         console.log(scopedExercises);
       }
+
+      // await database.collection("logs").updateOne(
+      //   {
+      //     _id: objectId,
+      //   },
+      //   { $set: { logs: scopedExercises } }
+      // );
 
       res.json({
         username: username,
