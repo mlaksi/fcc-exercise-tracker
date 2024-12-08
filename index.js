@@ -1,5 +1,4 @@
 const express = require("express");
-
 const db = require("./db");
 const app = express();
 const cors = require("cors");
@@ -18,15 +17,21 @@ app.post("/api/users", async (req, res) => {
   //res.json({ test: req.body.username });
   try {
     const database = db.getDb();
-    await database
-      .collection("users")
-      .insertOne({ username: req.body.username });
-    const userObject = await database
+    const existingUser = await database
       .collection("users")
       .findOne({ username: req.body.username });
-    //console.log(userObject);
-    //console.log(typeof userObject);
-    res.json({ username: req.body.username, _id: userObject._id });
+    if (existingUser) {
+      res.json({ username: existingUser.username, _id: existingUser._id });
+    } else {
+      await database
+        .collection("users")
+        .insertOne({ username: req.body.username });
+      const userObject = await database
+        .collection("users")
+        .findOne({ username: req.body.username });
+
+      res.json({ username: req.body.username, _id: userObject._id });
+    }
   } catch (err) {
     console.log(err);
     res.status(500).send("Error inserting user.");
